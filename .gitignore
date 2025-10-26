@@ -1,0 +1,11 @@
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Sensitive information
+.env
+.venv/
+__pycache__
+
+# IDE specific files
+.vscode/
