@@ -6,9 +6,10 @@ and an address book that stores multiple records.
 """
 
 from collections import UserDict
+import re
 
 
-class CustomValueError(Exception):
+class CustomValueError(ValueError):
     """Class for handle custom errors"""
 
     def __init__(self, message="Something went wrong"):
@@ -48,12 +49,15 @@ class Phone(Field):
     def validate_number(phone_number):
         """Validate phone number"""
 
-        only_digits = "".join(filter(str.isdigit, phone_number))
+        if not phone_number or not phone_number.strip():
+            raise CustomValueError("Phone number cannot be empty")
 
-        if len(only_digits) == 10:
-            return only_digits
+        if not re.fullmatch(r"\d{10}", phone_number):
+            raise CustomValueError(
+                f"Number {phone_number} is invalid. Must be exactly 10 digits."
+            )
 
-        raise ValueError(f"Number {phone_number} is invalid, should contain 10 digits")
+        return phone_number
 
 
 class Record:
@@ -76,29 +80,26 @@ class Record:
             if number.value == phone_number:
                 return number
 
-        raise CustomValueError(f"Number {phone_number} not found")
+        return None
 
     def remove_phone(self, phone_number):
         """Remove phone number from contact book"""
 
         phone = self.find_phone(phone_number)
 
-        self.phones = list(
-            filter(lambda number: number.value != phone.value, self.phones)
-        )
-
-        print(f"Phone number {phone_number} removed successfully")
+        if phone:
+            self.phones = list(
+                filter(lambda number: number.value != phone.value, self.phones)
+            )
 
     def edit_phone(self, old_phone_number, new_phone_number):
         """Edit phone number in contact book"""
 
-        validated_new_phone = Phone(new_phone_number)
         phone_to_edit = self.find_phone(old_phone_number)
-        if phone_to_edit:
-            phone_to_edit.value = validated_new_phone.value
-            return
 
-        raise CustomValueError(f"Phone number {old_phone_number} not found.")
+        if phone_to_edit:
+            validated_new_phone = Phone(new_phone_number)
+            phone_to_edit.value = validated_new_phone.value
 
     def __str__(self):
         return f"Contact name: {self.name.value}, phones: {'; '.join(p.value for p in self.phones)}"
