@@ -88,9 +88,7 @@ class Record:
         phone = self.find_phone(phone_number)
 
         if phone:
-            self.phones = list(
-                filter(lambda number: number.value != phone.value, self.phones)
-            )
+            self.phones.remove(phone)
 
     def edit_phone(self, old_phone_number, new_phone_number):
         """Edit phone number in contact book"""
